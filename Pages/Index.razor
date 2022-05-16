@@ -1,0 +1,61 @@
+﻿@page "/"
+@using BlazorApp.Data
+
+<PageTitle>Sushi</PageTitle>
+
+<center>
+    @if (!bIsRoomSet)
+    {
+        <h1>Inserisci stanza:</h1>
+        <input placeholder="Codice stanza..."  type="text" @bind-value="@sRoom" />
+        <button class="btn-primary" @onclick="UpdateRoom">Conferma</button>
+    }
+    else
+    {
+        <h1>Aggiungi ordine:</h1>
+        <input placeholder="Es. 159" type="text" @bind-value="@sItem" />
+
+        <br />
+        <input style="margin-top:10px" type="number" @bind-value="@iQty" />
+
+        <br />
+        <button class="btn-primary" style="margin-top:10px" @onclick="AddOrder">Conferma</button>
+        <hr class="large"/>
+        @if (tempOrders.Keys.Count > 0)
+        {
+            <table class="large" border="1">
+                @for (int i = 0; i < tempOrders.Keys.Count; i++)
+                {
+                    <tr><td>@tempOrders.Keys.ElementAt(i)</td><td>@tempOrders.Values.ElementAt(i)</td></tr>
+                }
+            </table>
+        }
+    }
+</center>
+
+@code {
+    public string sError = "";
+    public string sRoom = "";
+    public bool bIsRoomSet = false;
+
+    public string sItem = "";
+    public int iQty = 1;
+
+    public Dictionary<string, int> tempOrders = new Dictionary<string, int>();
+
+    public void UpdateRoom()
+    {
+        bIsRoomSet = true;
+        tempOrders = MainContainer.GetOrders(sRoom);
+        StateHasChanged();
+    }
+
+    public void AddOrder()
+    {
+        MainContainer.AddOrder(sRoom, sItem, iQty);
+        sItem = "";
+        iQty = 1;
+
+        UpdateRoom();
+    }
+}
