@@ -1,0 +1,74 @@
+﻿<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifica ordine</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="number" @bind=value />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" style="position:absolute; left:1rem;" @onclick="CancellaTutto">Cancella tutto</button>
+                <button type="button" class="btn btn-primary" @onclick="Confirm">OK</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Annulla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+    [Parameter]
+    public EventCallback<Tuple<string, int, int>> OnOrderEdited { get; set; }
+
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    private string item = "";
+    private int value = 1;
+    private int iStatus = 0;    // 0 non è successo nulla, 1 premuto OK, 2 cancella tutto
+
+    public void Open(string? _item)
+    {
+        Console.WriteLine("Apertura");
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        item = _item==null?"":_item;
+        value = 1;
+        iStatus = 0;
+        StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        await OnOrderEdited.InvokeAsync(new Tuple<string, int, int>(item, iStatus, value));
+        StateHasChanged();
+    }
+
+    private async Task CancellaTutto()
+    {
+        iStatus = 2;
+        await Close();
+    }
+
+    private async Task Confirm()
+    {
+        iStatus = 1;
+        await Close();
+    }
+}

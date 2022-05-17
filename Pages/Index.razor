@@ -2,13 +2,17 @@
 @using BlazorApp.Data
 
 <PageTitle>Sushi</PageTitle>
+<ModalEditOrder @ref="EditOrder" OnOrderEdited="OrderEdited"></ModalEditOrder>
 
 <center>
     @if (!bIsRoomSet)
     {
         <h1>Inserisci stanza:</h1>
-        <input placeholder="Codice stanza..."  type="text" @bind-value="@sRoom" />
+        <input placeholder="Codice stanza..." type="text" @bind-value="@sRoom" />
         <button class="btn-primary" @onclick="UpdateRoom">Conferma</button>
+
+        <br />
+        <button class="btn-primary" @onclick="RemoveAll">Pulisci</button>
     }
     else
     {
@@ -20,13 +24,14 @@
 
         <br />
         <button class="btn-primary" style="margin-top:10px" @onclick="AddOrder">Conferma</button>
-        <hr class="large"/>
+        <hr class="large" />
         @if (tempOrders.Keys.Count > 0)
         {
-            <table class="large" border="1">
+            <table class="large" border="1" style="text-align:center;">
                 @for (int i = 0; i < tempOrders.Keys.Count; i++)
                 {
-                    <tr><td>@tempOrders.Keys.ElementAt(i)</td><td>@tempOrders.Values.ElementAt(i)</td></tr>
+                    string item = tempOrders.Keys.ElementAt(i);
+                    <tr><td>@item</td><td>@tempOrders.Values.ElementAt(i)</td><td style="width:26px; position: relative;"><img @onclick="()=>EditOrder?.Open(item)" src="icons8-edit.svg" style="left:0; width:100%; height:100%; margin: 0; position: absolute; top: 50%; transform: translateY(-50%);" /></td></tr>
                 }
             </table>
         }
@@ -34,6 +39,8 @@
 </center>
 
 @code {
+    private Guid User;
+    private ModalEditOrder? EditOrder { get; set; }
     public string sError = "";
     public string sRoom = "";
     public bool bIsRoomSet = false;
@@ -43,11 +50,27 @@
 
     public Dictionary<string, int> tempOrders = new Dictionary<string, int>();
 
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (firstRender) User = Guid.NewGuid(); }
+
+    public void SetRoom()
+    {
+        bIsRoomSet = true;
+        UpdateRoom();
+        MainContainer.AddCallback(sRoom, User.ToString(), UpdateRoom);
+    }
+
     public void UpdateRoom()
+    {
+        tempOrders = MainContainer.GetOrders(sRoom);
+        StateHasChanged();
+    }
+
+    public void RemoveAll()
     {
         bIsRoomSet = true;
         tempOrders = MainContainer.GetOrders(sRoom);
-        StateHasChanged();
+        for (int i = 0; i < tempOrders.Keys.Count; i++) { MainContainer.RemoveOrder(sRoom, tempOrders.Keys.ElementAt(i), -1); }
+        UpdateRoom();
     }
 
     public void AddOrder()
@@ -57,5 +80,13 @@
         iQty = 1;
 
         UpdateRoom();
+    }
+
+    private void OrderEdited(Tuple<string, int, int> args)
+    {
+        if (args.Item2 == 0) return;
+        else if (args.Item2 == 2) { MainContainer.RemoveOrder(sRoom, args.Item1, -1); return; }
+
+        if (args.Item2 > 0) MainContainer.RemoveOrder(sRoom, args.Item1, args.Item2);
     }
 }

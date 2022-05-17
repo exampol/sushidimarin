@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "no1S2h1bi0NgOoWwJgkKY1QbgaNquL0bYpMvICL5xTQ=",
+  "Hash": "xQdP8AR/sRlns06eA9uluIQkYLnBgDhKiD6gHQGo5hc=",
   "Source": "BlazorApp",
   "BasePath": "_content/BlazorApp",
   "Mode": "Default",
@@ -270,6 +270,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "D:\\Progetti\\Sito Ordini\\BlazorApp\\wwwroot\\icons8-edit.svg",
+      "SourceId": "BlazorApp",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Progetti\\Sito Ordini\\BlazorApp\\wwwroot\\",
+      "BasePath": "_content/BlazorApp",
+      "RelativePath": "icons8-edit.svg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\icons8-edit.svg"
     }
   ]
 }
