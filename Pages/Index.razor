@@ -22,7 +22,7 @@
         <br />
         <button class="btn-primary" style="margin-top:10px" @onclick="AddOrder">Conferma</button>
         <br />
-        <button class="btn-primary" @onclick="RemoveAll">Pulisci</button>
+        <button class="btn-primary" style="margin-top:10px" @onclick="RemoveAll">Pulisci</button>
         <hr class="large" />
         @if (tempOrders.Keys.Count > 0)
         {
@@ -66,9 +66,7 @@
 
     public void RemoveAll()
     {
-        bIsRoomSet = true;
-        tempOrders = MainContainer.GetOrders(sRoom);
-        for (int i = 0; i < tempOrders.Keys.Count; i++) { MainContainer.RemoveOrder(sRoom, tempOrders.Keys.ElementAt(i), -1); }
+        MainContainer.RemoveAllOrders(sRoom);
         UpdateRoom();
     }
 

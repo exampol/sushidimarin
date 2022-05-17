@@ -24,6 +24,7 @@
       else orders[item] += iQty;
 
       List<Action> actions = GetCallBacks(room);
+      Console.WriteLine("Chiamo le callback: "+actions.Count);
       for (int i = 0; i < actions.Count; i++)
       {
         try { actions[i].Invoke(); } catch (Exception) { }
@@ -68,6 +69,7 @@
 
       if (!callBacks.ContainsKey(user)) callBacks.Add(user, action);
       else callBacks[user] = action;
+      Console.WriteLine("Aggiunta callback!");
     }
 
     public static void RemoveOrder(string room, string item, int iQty)
@@ -82,6 +84,13 @@
         orders[item] -= iQty;
         if (orders[item] <= 0) orders.Remove(item);
       }
+    }
+    
+    public static void RemoveAllOrders(string room)
+    {
+      string realRoom = room.ToUpperInvariant();
+      Dictionary<string, int> orders = GetOrders(realRoom);
+      orders.Clear();
     }
 
     public static void CleanRooms()
