@@ -1,11 +1,13 @@
-﻿namespace BlazorApp.Data
+﻿using Microsoft.AspNetCore.Connections.Features;
+
+namespace BlazorApp.Data
 {
   public static class MainContainer
   {
     public static Dictionary<string, DateTime> roomDates = new Dictionary<string, DateTime>();
     public static Dictionary<string, Dictionary<string, int>> rooms = new Dictionary<string, Dictionary<string, int>>();
     public static Dictionary<string, List<string>> users = new Dictionary<string, List<string>>();
-    public static Dictionary<string, Action> callBacks = new Dictionary<string, Action>();
+    public static Dictionary<string, Tuple<Action, DateTime>> callBacks = new Dictionary<string, Tuple<Action, DateTime>>();
     public static Dictionary<string, int> GetOrders(string room)
     {
       string realRoom = room.ToUpperInvariant();
@@ -24,7 +26,7 @@
       else orders[item] += iQty;
 
       List<Action> actions = GetCallBacks(room);
-      Console.WriteLine("Chiamo le callback: "+actions.Count);
+      Console.WriteLine("Chiamo le callback: " + actions.Count);
       for (int i = 0; i < actions.Count; i++)
       {
         try { actions[i].Invoke(); } catch (Exception) { }
@@ -40,7 +42,7 @@
       List<string> lstUsers = users[realRoom];
       for (int i = 0; i < lstUsers.Count; i++)
       {
-        if (string.Equals(lstUsers[i], user)) return callBacks[user];
+        if (string.Equals(lstUsers[i], user)) return callBacks[user].Item1;
       }
       return null;
     }
@@ -52,7 +54,7 @@
       if (!users.ContainsKey(realRoom)) return actions;
 
       List<string> lstUsers = users[realRoom];
-      for (int i = 0; i < lstUsers.Count; i++) { if (callBacks.ContainsKey(lstUsers[i])) actions.Add(callBacks[lstUsers[i]]); }
+      for (int i = 0; i < lstUsers.Count; i++) { if (callBacks.ContainsKey(lstUsers[i])) actions.Add(callBacks[lstUsers[i]].Item1); }
       return actions;
     }
 
@@ -67,8 +69,9 @@
       for (int i = 0; i < lstUsers.Count; i++) { if (lstUsers[i] == user) { bFound = true; break; } }
       if (!bFound) users[realRoom].Add(user);
 
-      if (!callBacks.ContainsKey(user)) callBacks.Add(user, action);
-      else callBacks[user] = action;
+      Console.WriteLine("Aggiungo callback");
+      if (!callBacks.ContainsKey(user)) callBacks.Add(user, new Tuple<Action, DateTime>(action, DateTime.Now));
+      else callBacks[user] = new Tuple<Action, DateTime>(action, DateTime.Now);
       Console.WriteLine("Aggiunta callback!");
     }
 
@@ -85,7 +88,7 @@
         if (orders[item] <= 0) orders.Remove(item);
       }
     }
-    
+
     public static void RemoveAllOrders(string room)
     {
       string realRoom = room.ToUpperInvariant();
@@ -95,15 +98,28 @@
 
     public static void CleanRooms()
     {
+      DateTime now = DateTime.Now;
       for (int i = 0; i < roomDates.Count; i++)
       {
         string room = roomDates.Keys.ElementAt(i);
         DateTime lastMod = roomDates[room];
 
-        if (lastMod.AddDays(3) < DateTime.Now)
+        if (lastMod.AddDays(3) < now)
         {
           rooms.Remove(room);
           roomDates.Remove(room);
+          users.Remove(room);
+          i--;
+        }
+      }
+
+      for (int i = 0; i < callBacks.Count; i++)
+      {
+        string user = callBacks.Keys.ElementAt(i);
+        DateTime lastMod = callBacks[user].Item2;
+        if (lastMod.AddDays(3) < now)
+        {
+          callBacks.Remove(user);
           i--;
         }
       }
@@ -120,6 +136,7 @@
       string realRoom = room.ToUpperInvariant();
       if (!rooms.ContainsKey(realRoom)) rooms.Add(realRoom, new Dictionary<string, int>());
       if (!roomDates.ContainsKey(realRoom)) roomDates.Add(realRoom, DateTime.Now);
+      if (!users.ContainsKey(realRoom)) users.Add(realRoom, new List<string>());
     }
   }
 }
