@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using BlazorApp.Data
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
 
 <PageTitle>Sushi</PageTitle>
 <ModalEditOrder @ref="EditOrder" OnOrderEdited="OrderEdited"></ModalEditOrder>
@@ -38,7 +41,8 @@
 </center>
 
 @code {
-    private Guid User;
+    private HubConnection? hubConnection;
+
     private ModalEditOrder? EditOrder { get; set; }
     public string sError = "";
     public string sRoom = "";
@@ -49,13 +53,37 @@
 
     public Dictionary<string, int> tempOrders = new Dictionary<string, int>();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) { if (firstRender) User = Guid.NewGuid(); }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender && MainContainer.NavigationManager == null) { MainContainer.NavigationManager = NavigationManager; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/clienthub")).Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (room, message) =>
+        {
+            if(string.Equals(sRoom, room, StringComparison.CurrentCultureIgnoreCase)) InvokeAsync(UpdateRoom);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
 
     public void SetRoom()
     {
         bIsRoomSet = true;
         UpdateRoom();
-        MainContainer.AddCallback(sRoom, User.ToString(), UpdateRoom);
     }
 
     public void UpdateRoom()
@@ -64,26 +92,26 @@
         StateHasChanged();
     }
 
-    public void RemoveAll()
+    public async Task RemoveAll()
     {
-        MainContainer.RemoveAllOrders(sRoom);
+        await MainContainer.RemoveAllOrdersAsync(sRoom);
         UpdateRoom();
     }
 
-    public void AddOrder()
+    public async Task AddOrder()
     {
-        MainContainer.AddOrder(sRoom, sItem, iQty);
+        await MainContainer.AddOrderAsync(sRoom, sItem, iQty);
         sItem = "";
         iQty = 1;
 
         UpdateRoom();
     }
 
-    private void OrderEdited(Tuple<string, int, int> args)
+    private async Task OrderEdited(Tuple<string, int, int> args)
     {
         if (args.Item2 == 0) return;
-        else if (args.Item2 == 2) { MainContainer.RemoveOrder(sRoom, args.Item1, -1); return; }
+        else if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, -1); return; }
 
-        if (args.Item2 > 0) MainContainer.RemoveOrder(sRoom, args.Item1, args.Item2);
+        if (args.Item2 > 0) await MainContainer.RemoveOrderAsync(sRoom, args.Item1, args.Item3);
     }
 }

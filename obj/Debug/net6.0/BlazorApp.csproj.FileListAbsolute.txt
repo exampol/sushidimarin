@@ -24,3 +24,16 @@ D:\Progetti\Sito Ordini\BlazorApp\obj\Debug\net6.0\refint\BlazorApp.dll
 D:\Progetti\Sito Ordini\BlazorApp\obj\Debug\net6.0\BlazorApp.pdb
 D:\Progetti\Sito Ordini\BlazorApp\obj\Debug\net6.0\BlazorApp.genruntimeconfig.cache
 D:\Progetti\Sito Ordini\BlazorApp\obj\Debug\net6.0\ref\BlazorApp.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.Connections.Abstractions.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Client.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Common.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.Core.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Common.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.Extensions.Features.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\Newtonsoft.Json.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\System.IO.Pipelines.dll
+D:\Progetti\Sito Ordini\BlazorApp\bin\Debug\net6.0\System.Net.WebSockets.WebSocketProtocol.dll
+D:\Progetti\Sito Ordini\BlazorApp\obj\Debug\net6.0\BlazorApp.csproj.CopyComplete

@@ -2,18 +2,18 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Modifica ordine</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                <h5 class="modal-title">Togli piatti</h5>
+                <button type="button" class="close" style="border:0" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <input type="number" @bind=value />
+                <input type="number" @bind=value style="width:100%"/>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" style="position:absolute; left:1rem;" @onclick="CancellaTutto">Cancella tutto</button>
+                <button type="button" class="btn btn-primary" style="position:absolute; left:1rem;" @onclick="CancellaTutto">Cancella tutto</button>
                 <button type="button" class="btn btn-primary" @onclick="Confirm">OK</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Annulla</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="() => Close()">Annulla</button>
             </div>
         </div>
     </div>
