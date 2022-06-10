@@ -127,6 +127,7 @@
 
     private async Task OrderEdited(Tuple<string, int, int> args)
     {
+        ShowDetailsForm?.Close();
         if (args.Item2 == 0) return;
         else if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, -1); return; }
         if (args.Item2 > 0) await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, args.Item3);
