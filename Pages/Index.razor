@@ -6,13 +6,19 @@
 
 <PageTitle>Sushi</PageTitle>
 <ModalEditOrder @ref="EditOrder" OnOrderEdited="OrderEdited"></ModalEditOrder>
+<ModalConfirm @ref="ConfirmRemove" OnPulisci="RemoveAll"></ModalConfirm>
 
 <center>
     @if (!bIsRoomSet)
     {
-        <h1>Inserisci stanza:</h1>
+        <h1>Inserisci stanza e nome:</h1>
         <input placeholder="Codice stanza..." type="text" @bind-value="@sRoom" />
-        <button class="btn-primary" @onclick="SetRoom">Conferma</button>
+
+        <br />
+        <input placeholder="Nome..." type="text" @bind-value="@sName" style="margin-top:10px" />
+
+        <br />
+        <button class="btn-primary" @onclick="SetRoom" style="margin-top:10px">Conferma</button>
     }
     else
     {
@@ -25,7 +31,7 @@
         <br />
         <button class="btn-primary" style="margin-top:10px" @onclick="AddOrder">Conferma</button>
         <br />
-        <button class="btn-primary" style="margin-top:10px" @onclick="RemoveAll">Pulisci</button>
+        <button class="btn-primary" style="margin-top:10px" @onclick="()=>ConfirmRemove?.Open()">Pulisci</button>
         <hr class="large" />
         @if (tempOrders.Keys.Count > 0)
         {
@@ -44,8 +50,10 @@
     private HubConnection? hubConnection;
 
     private ModalEditOrder? EditOrder { get; set; }
+    private ModalConfirm? ConfirmRemove { get; set; }
     public string sError = "";
     public string sRoom = "";
+    public string sName = "";
     public bool bIsRoomSet = false;
 
     public string sItem = "";
@@ -55,7 +63,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender && MainContainer.NavigationManager == null) { MainContainer.NavigationManager = NavigationManager; }
+        if (firstRender && MainContainer.NavigationManager == null) { MainContainer.NavigationManager = NavigationManager; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -64,7 +72,7 @@
 
         hubConnection.On<string, string>("ReceiveMessage", (room, message) =>
         {
-            if(string.Equals(sRoom, room, StringComparison.CurrentCultureIgnoreCase)) InvokeAsync(UpdateRoom);
+            if (string.Equals(sRoom, room, StringComparison.CurrentCultureIgnoreCase)) InvokeAsync(UpdateRoom);
         });
 
         await hubConnection.StartAsync();
@@ -82,6 +90,8 @@
 
     public void SetRoom()
     {
+        if (string.IsNullOrEmpty(sRoom) || string.IsNullOrEmpty(sName)) return;
+
         bIsRoomSet = true;
         UpdateRoom();
     }
@@ -100,7 +110,7 @@
 
     public async Task AddOrder()
     {
-        await MainContainer.AddOrderAsync(sRoom, sItem, iQty);
+        await MainContainer.AddOrderAsync(sRoom, sItem, sName, iQty);
         sItem = "";
         iQty = 1;
 
@@ -110,8 +120,7 @@
     private async Task OrderEdited(Tuple<string, int, int> args)
     {
         if (args.Item2 == 0) return;
-        else if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, -1); return; }
-
-        if (args.Item2 > 0) await MainContainer.RemoveOrderAsync(sRoom, args.Item1, args.Item3);
+        else if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, -1); return; }
+        if (args.Item2 > 0) await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, args.Item3);
     }
 }
