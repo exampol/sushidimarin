@@ -11,16 +11,24 @@
             </div>
             <div class="modal-body">
                 <table style="text-align:center; border: 1px solid black; width:100%;height:100%">
-                    <tr><td>Utente</td><td>Quantità</td><td style="width:26px;"></td></tr>
-                    @for (int i = 0; i < details.Count; i++) {
-                        string owner = details.ElementAt(i).Key;
-                        int qty = details[owner];
-                        if (owner == name) {
-                            <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"><img @onclick="()=>EditOrder.Open(item)" src="icons8-edit.svg" style="left:0; width:100%; height:100%; margin: 0; position: absolute; top: 50%; transform: translateY(-50%);" /></td></tr>
-                        } else {
-                            <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"></td></tr>
+                    <tr>
+                        <td>@columnName</td>
+                        <td>Quantità</td>
+                        @if (showEdit) { <td style="width:26px;"></td> }
+
+                        </tr>
+                        @for (int i = 0; i < details.Count; i++) {
+                            string owner = details.ElementAt(i).Key;
+                            int qty = details[owner];
+                            if (!showEdit) {
+                                <tr><td>@owner</td><td>@qty</td></tr>
+                            }
+                            else if (owner == name) {
+                                <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"><img @onclick="()=>{ if(!bReadOnly) EditOrder.Open(item); }" src="icons8-edit.svg" style="left:0; width:100%; height:100%; margin: 0; position: absolute; top: 50%; transform: translateY(-50%);" /></td></tr>
+                            } else {
+                                <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"></td></tr>
+                            }
                         }
-                    }
                 </table>
             </div>
         </div>
@@ -45,15 +53,21 @@
 
     private string item = "";
     private string name = "";
+    private string columnName = "";
+    private bool showEdit = true;
     private Dictionary<string, int> details = new Dictionary<string, int>();
+    private bool bReadOnly;
 
-    public void Open(string? _item, string? _name, Dictionary<string, int> _details) {
+    public void Open(string? _item, string? _name, string? _columnName, bool? _showEdit, Dictionary<string, int> _details, bool bReadOnly) {
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;
         item = _item == null ? "" : _item;
         name = _name == null ? "" : _name;
+        columnName = _columnName == null ? "" : _columnName;
+        showEdit = _showEdit == null ? true : false;
         details = _details;
+        this.bReadOnly = bReadOnly;
 
         StateHasChanged();
     }
