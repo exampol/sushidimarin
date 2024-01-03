@@ -37,6 +37,8 @@ app.UseResponseCompression();
 //    app.UseExceptionHandler("/Error");
 //}
 
+app.UseHttpsRedirection();
+
 app.UseCors(builder => builder
     .AllowAnyHeader()
     .AllowAnyMethod()
