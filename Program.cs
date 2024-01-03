@@ -21,6 +21,22 @@ builder.Services.AddResponseCompression(opts =>
       new[] { "application/octet-stream" });
 });
 
+builder.Services.AddSignalR(o =>
+{
+  o.EnableDetailedErrors = true;
+});
+
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("CorsPolicy",
+      builder => builder
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials()
+                  .AllowAnyOrigin()
+      );
+});
+
 var app = builder.Build();
 
 app.UseResponseCompression();
@@ -36,6 +52,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.UseCors("CorsPolicy");
 app.MapHub<ClientHub>("/clienthub");
 app.MapFallbackToPage("/_Host");
 
