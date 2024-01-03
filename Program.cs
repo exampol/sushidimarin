@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT");
 
 //set listening urls
-builder.WebHost.UseUrls($"http://0.0.0.0:{port};http://localhost:3000");
+builder.WebHost.UseUrls($"https://0.0.0.0:{port};https://localhost:3000");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
