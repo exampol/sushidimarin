@@ -15,18 +15,19 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port};http://localhost:3000");
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddResponseCompression(opts =>
-{
+builder.Services.AddResponseCompression(opts => {
   opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
       new[] { "application/octet-stream" });
 });
 
-builder.Services.AddSignalR(o =>
-{
-  o.EnableDetailedErrors = true;
-});
+builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
+  builder
+      .AllowAnyMethod()
+      .AllowAnyHeader()
+      .AllowAnyHeader();
+}));
 
-builder.Services.AddCors();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -38,13 +39,7 @@ app.UseResponseCompression();
 //}
 
 app.UseHttpsRedirection();
-
-app.UseCors(builder => builder
-    .AllowAnyHeader()
-    .AllowAnyMethod()
-    .SetIsOriginAllowed((host) => true)
-    .AllowCredentials()
-  );
+app.UseCors("CorsPolicy");
 
 app.UseStaticFiles();
 
@@ -53,5 +48,7 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapHub<ClientHub>("/clienthub");
 app.MapFallbackToPage("/_Host");
+
+app.UseMvc();
 
 app.Run();
