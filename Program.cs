@@ -26,6 +26,8 @@ builder.Services.AddSignalR(o =>
   o.EnableDetailedErrors = true;
 });
 
+builder.Services.AddCors();
+
 var app = builder.Build();
 
 app.UseResponseCompression();
