@@ -7,7 +7,7 @@ using BlazorApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 //retrieve port from environment variables
-var port = builder.Configuration["PORT"];
+var port = Environment.GetEnvironmentVariable("PORT");
 
 //set listening urls
 builder.WebHost.UseUrls($"http://0.0.0.0:{port};http://localhost:3000");
