@@ -26,16 +26,6 @@ builder.Services.AddSignalR(o =>
   o.EnableDetailedErrors = true;
 });
 
-builder.Services.AddCors(options =>
-{
-  options.AddPolicy("CorsPolicy",
-      builder => builder
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowAnyOrigin()
-      );
-});
-
 var app = builder.Build();
 
 app.UseResponseCompression();
@@ -45,13 +35,18 @@ app.UseResponseCompression();
 //    app.UseExceptionHandler("/Error");
 //}
 
+app.UseCors(builder => builder
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .SetIsOriginAllowed((host) => true)
+    .AllowCredentials()
+  );
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.MapBlazorHub();
-app.UseCors("CorsPolicy");
 app.MapHub<ClientHub>("/clienthub");
 app.MapFallbackToPage("/_Host");
 
