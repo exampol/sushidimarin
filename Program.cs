@@ -25,10 +25,10 @@ var app = builder.Build();
 
 app.UseResponseCompression();
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-}
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Error");
+//}
 
 
 app.UseStaticFiles();
