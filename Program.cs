@@ -7,10 +7,10 @@ using BlazorApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 //retrieve port from environment variables
-var port = Environment.GetEnvironmentVariable("PORT");
+var port = Environment.GetEnvironmentVariable("PORT") ?? "3000";
 
 //set listening urls
-builder.WebHost.UseUrls($"http://0.0.0.0:3000");
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
