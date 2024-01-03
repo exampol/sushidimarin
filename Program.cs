@@ -38,7 +38,6 @@ app.UseResponseCompression();
 //    app.UseExceptionHandler("/Error");
 //}
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 app.UseStaticFiles();
