@@ -75,6 +75,7 @@
     }
 
     protected override async Task OnInitializedAsync() {
+        Console.WriteLine("URL CHAT: "+NavigationManager.ToAbsoluteUri("/clienthub"));
         hubConnection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/clienthub")).Build();
 
         hubConnection.On<string, string>("ReceiveMessage", (room, message) => {

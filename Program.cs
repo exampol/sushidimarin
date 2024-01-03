@@ -49,6 +49,4 @@ app.MapBlazorHub();
 app.MapHub<ClientHub>("/clienthub");
 app.MapFallbackToPage("/_Host");
 
-app.UseMvc();
-
 app.Run();
