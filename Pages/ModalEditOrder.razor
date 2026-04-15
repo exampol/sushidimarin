@@ -1,30 +1,31 @@
-﻿<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay; z-index:2000">
-    <div class="modal-dialog" role="document">
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay; z-index:2000">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Togli piatti</h5>
-                <button type="button" class="close" style="border:0" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                <h5 class="modal-title">✏️ Modifica quantità</h5>
+                <button type="button" class="close" aria-label="Close" @onclick="() => Close()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <input type="number" @bind=value style="width:100%"/>
+                <label class="form-label">Piatto: <strong>@item</strong></label>
+                <label class="form-label" style="margin-top:0.75rem;">Quantità da rimuovere</label>
+                <input type="number" min="1" @bind=value style="width:100%" />
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" style="position:absolute; left:1rem;" @onclick="CancellaTutto">Cancella tutto</button>
-                <button type="button" class="btn btn-primary" @onclick="Confirm">OK</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="() => Close()">Annulla</button>
+            <div class="modal-footer" style="justify-content:space-between;">
+                <button type="button" class="btn-sushi btn-danger" @onclick="CancellaTutto">🗑 Cancella tutto</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button type="button" class="btn-sushi btn-primary" @onclick="Confirm">OK</button>
+                    <button type="button" class="btn-sushi btn-ghost" @onclick="() => Close()">Annulla</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-
-@if (ShowBackdrop)
-{
+@if (ShowBackdrop) {
     <div class="modal-backdrop fade show"></div>
 }
-
 
 @code {
     [Parameter]
@@ -37,21 +38,19 @@
 
     private string item = "";
     private int value = 1;
-    private int iStatus = 0;    // 0 non è successo nulla, 1 premuto OK, 2 cancella tutto
+    private int iStatus = 0;
 
-    public void Open(string? _item)
-    {
+    public void Open(string? _item) {
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;
-        item = _item==null?"":_item;
+        item = _item == null ? "" : _item;
         value = 1;
         iStatus = 0;
         StateHasChanged();
     }
 
-    public async Task Close()
-    {
+    public async Task Close() {
         ModalDisplay = "none";
         ModalClass = "";
         ShowBackdrop = false;
@@ -59,14 +58,12 @@
         StateHasChanged();
     }
 
-    private async Task CancellaTutto()
-    {
+    private async Task CancellaTutto() {
         iStatus = 2;
         await Close();
     }
 
-    private async Task Confirm()
-    {
+    private async Task Confirm() {
         iStatus = 1;
         await Close();
     }

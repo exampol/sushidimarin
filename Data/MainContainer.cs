@@ -102,6 +102,7 @@ namespace BlazorApp.Data {
         string item = items.ElementAt(j).Key;
         if (items[item].Count == 0) {
           items.Remove(item);
+          j--;
         } else {
           for (int i = 0; i < items[item].Count; i++) {
             KeyValuePair<string, int> keyValuePair = items[item].ElementAt(i);
@@ -194,6 +195,7 @@ namespace BlazorApp.Data {
 
     public static async Task AddOrderAsync(string room, string item, string owner, int iQty) {
       string realRoom = room.ToUpperInvariant();
+      CreateRoom(realRoom);
       if (rooms.ContainsKey(realRoom)) rooms[realRoom].EditOrder(item, owner, Math.Max(iQty, 0));
 
       if (!connections.ContainsKey(realRoom) || connections[realRoom] is null) {

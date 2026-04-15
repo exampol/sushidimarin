@@ -1,45 +1,55 @@
-﻿@using BlazorApp.Data
-<ModalEditOrder @ref="EditOrder" OnOrderEdited="OnOrderEdited"></ModalEditOrder>
+@using BlazorApp.Data
+<ModalEditOrder @ref="EditOrder" OnOrderEdited="ForwardOrderEdited"></ModalEditOrder>
+
 <div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Dettagli</h5>
-                <button type="button" class="close" style="border:0" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                <h5 class="modal-title">📋 Dettagli — @item</h5>
+                <button type="button" class="close" aria-label="Close" @onclick="() => Close()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <table style="text-align:center; border: 1px solid black; width:100%;height:100%">
-                    <tr>
-                        <td>@columnName</td>
-                        <td>Quantità</td>
-                        @if (showEdit) { <td style="width:26px;"></td> }
-
+                <table class="order-table" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>@columnName</th>
+                            <th style="text-align:center; width:60px;">Qty</th>
+                            @if (showEdit) { <th style="width:44px;"></th> }
                         </tr>
+                    </thead>
+                    <tbody>
                         @for (int i = 0; i < details.Count; i++) {
                             string owner = details.ElementAt(i).Key;
                             int qty = details[owner];
-                            if (!showEdit) {
-                                <tr><td>@owner</td><td>@qty</td></tr>
-                            }
-                            else if (owner == name) {
-                                <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"><img @onclick="()=>{ if(!bReadOnly) EditOrder.Open(item); }" src="icons8-edit.svg" style="left:0; width:100%; height:100%; margin: 0; position: absolute; top: 50%; transform: translateY(-50%);" /></td></tr>
-                            } else {
-                                <tr><td>@owner</td><td>@qty</td><td style="width:26px; position: relative;"></td></tr>
-                            }
+                            <tr>
+                                <td>@owner</td>
+                                <td class="qty">@qty</td>
+                                @if (showEdit) {
+                                    <td class="action">
+                                        @if (owner == name) {
+                                            <button class="edit-btn" @onclick="() => { if (!bReadOnly) EditOrder?.Open(item); }" title="Modifica">
+                                                <img src="icons8-edit.svg" style="width:16px;height:16px;" />
+                                            </button>
+                                        }
+                                    </td>
+                                }
+                            </tr>
                         }
+                    </tbody>
                 </table>
+            </div>
+            <div class="modal-footer" style="justify-content:flex-end;">
+                <button type="button" class="btn-sushi btn-secondary" @onclick="() => Close()">Chiudi</button>
             </div>
         </div>
     </div>
 </div>
 
-
 @if (ShowBackdrop) {
     <div class="modal-backdrop fade show"></div>
 }
-
 
 @code {
     [Parameter]
@@ -62,20 +72,23 @@
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;
-        item = _item == null ? "" : _item;
-        name = _name == null ? "" : _name;
-        columnName = _columnName == null ? "" : _columnName;
-        showEdit = _showEdit == null ? true : false;
-        details = _details;
+        item       = _item       ?? "";
+        name       = _name       ?? "";
+        columnName = _columnName ?? "";
+        showEdit   = _showEdit ?? true;
+        details    = _details;
         this.bReadOnly = bReadOnly;
-
         StateHasChanged();
     }
 
     public async Task Close() {
         ModalDisplay = "none";
-        ModalClass = "";
+        ModalClass   = "";
         ShowBackdrop = false;
         StateHasChanged();
+    }
+
+    private async Task ForwardOrderEdited(Tuple<string, int, int> args) {
+        await OnOrderEdited.InvokeAsync(args);
     }
 }

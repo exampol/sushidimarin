@@ -1,56 +1,171 @@
-﻿@page "/"
+@page "/"
 @using BlazorApp.Data
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
 
-<PageTitle>Sushi</PageTitle>
+<PageTitle>Sushi di Marin</PageTitle>
 <ModalEditOrder @ref="EditOrder" OnOrderEdited="OrderEdited"></ModalEditOrder>
 <ModalShowDetails @ref="ShowDetailsForm" OnOrderEdited="OrderEdited"></ModalShowDetails>
 <ModalConfirm @ref="ConfirmRemove" OnPulisci="RemoveAll"></ModalConfirm>
 
-<center>
-    @if (!bIsRoomSet) {
-        <h1>Inserisci stanza e nome:</h1>
-        <input placeholder="Codice stanza..." type="text" @bind-value="@sRoom" />
+<div style="display:flex; flex-direction:column; align-items:center; padding: 2rem 1rem;">
 
-        <br />
-        <input placeholder="Nome..." type="text" @bind-value="@sName" style="margin-top:10px" />
+@if (!bIsRoomSet) {
+    <!-- LOGIN CARD -->
+    <div class="card-sushi" style="width:100%; margin-top:1rem;">
+        <div class="text-center" style="margin-bottom:1.5rem;">
+            <div style="font-size:3rem; margin-bottom:0.5rem;">🍱</div>
+            <div class="page-title">Entra nella stanza</div>
+            <div class="page-subtitle">Inserisci il codice stanza e il tuo nome</div>
+        </div>
 
-        <br />
-        <button class="btn-primary" @onclick="SetRoom" style="margin-top:10px">Conferma</button>
-    } else {
-        if (iCurrentRevision == -1) {
-            <h1>Aggiungi ordine:</h1>
-            <input placeholder="Es. 159" type="text" @bind-value="@sItem" />
+        <div class="input-group-sushi">
+            <div>
+                <label class="form-label">Codice stanza</label>
+                <input placeholder="Es. TAVOLO1" type="text" @bind-value="@sRoom" @onkeydown="@(e => { if (e.Key == "Enter") SetRoom(); })" />
+            </div>
+            <div>
+                <label class="form-label">Il tuo nome</label>
+                <input placeholder="Es. Marco" type="text" @bind-value="@sName" @onkeydown="@(e => { if (e.Key == "Enter") SetRoom(); })" />
+            </div>
+        </div>
 
-            <br />
-            <input style="margin-top:10px" type="number" @bind-value="@iQty" />
+        <button class="btn-sushi btn-primary w-100 mt-1" @onclick="SetRoom">
+            Entra &rarr;
+        </button>
+    </div>
 
-            <br />
-            <button class="btn-primary" style="margin-top:10px" @onclick="AddOrder">Conferma</button>
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>PrevOrders()">Precedente</button>
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>GetMyOrder()">Mio ordine</button>
-            <br />
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>ConfirmRemove?.Open()">Pulisci</button>
-        } else {
-            <h1>Revisione: @iCurrentRevision</h1>
-            <br />
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>PrevOrders()">Precedente</button>
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>{iCurrentRevision=-1; InvokeAsync(UpdateRoom);}">Attuale</button>
-            <button class="btn-primary" style="margin-top:10px" @onclick="()=>GetMyOrder()">Mio ordine</button>
+} else {
+    <!-- ORDER CARD -->
+    <div class="card-sushi-wide" style="width:100%;">
+
+        <!-- Room + user badge -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+            <span class="room-badge">
+                🏠 @sRoom.ToUpper() &nbsp;|&nbsp; <span class="name">@sName</span>
+            </span>
+            @if (iCurrentRevision != -1) {
+                <span class="revision-banner" style="margin:0; padding:0.2rem 0.8rem;">
+                    📜 Revisione @iCurrentRevision
+                </span>
+            }
+        </div>
+
+        @if (iCurrentRevision == -1) {
+            <!-- ADD ORDER FORM -->
+            <div class="section-title">Aggiungi piatto</div>
+            <div class="input-row" style="margin-bottom:0.75rem;">
+                <input placeholder="Codice piatto (es. 159)" type="text" @bind-value="@sItem"
+                       @onkeydown="@(async e => { if (e.Key == "Enter") await AddOrder(); })"
+                       style="flex:1;" />
+                <input type="number" min="1" @bind-value="@iQty" style="width:80px;" />
+                <button class="btn-sushi btn-primary" @onclick="AddOrder">+ Aggiungi</button>
+            </div>
+
+            <hr class="divider divider-red" />
         }
-        <hr class="large" />
-        @if (tempOrders.Keys.Count > 0) {
-            <table class="large" border="1" style="text-align:center;">
-                @for (int i = 0; i < tempOrders.Keys.Count; i++) {
-                    string item = tempOrders.Keys.ElementAt(i);
-                    <tr><td>@item</td><td>@tempOrders.Values.ElementAt(i)</td><td style="width:26px; position: relative;"><img @onclick='()=>ShowDetails(item, "Utente")' src="icons8-edit.svg" style="left:0; width:100%; height:100%; margin: 0; position: absolute; top: 50%; transform: translateY(-50%);" /></td></tr>
+
+        <!-- ACTION BUTTONS -->
+        <div class="btn-toolbar">
+            @if (iCurrentRevision == -1) {
+                <button class="btn-sushi btn-secondary" @onclick="()=>PrevOrders()">📜 Storico</button>
+                <button class="btn-sushi btn-ghost" @onclick="ToggleMyOrder">
+                    @(bShowMyOrder ? "✕ Chiudi ordine" : "👤 Mio ordine")
+                </button>
+                <button class="btn-sushi btn-danger" @onclick="()=>ConfirmRemove?.Open()">🗑 Pulisci</button>
+            } else {
+                <button class="btn-sushi btn-secondary" @onclick="()=>PrevOrders()">◀ Precedente</button>
+                <button class="btn-sushi btn-primary" @onclick="()=>{iCurrentRevision=-1; InvokeAsync(UpdateRoom);}">↩ Attuale</button>
+                <button class="btn-sushi btn-ghost" @onclick="ToggleMyOrder">
+                    @(bShowMyOrder ? "✕ Chiudi ordine" : "👤 Mio ordine")
+                </button>
+            }
+        </div>
+
+        <!-- MY ORDER INLINE PANEL -->
+        @if (bShowMyOrder) {
+            <div class="my-order-panel">
+                <div class="section-title">Il mio ordine</div>
+                @if (myOrders.Count == 0) {
+                    <div class="empty-state">
+                        <div class="icon">🍽</div>
+                        <div>Nessun piatto ordinato.</div>
+                    </div>
+                } else {
+                    <table class="order-table" style="margin-bottom:0.5rem;">
+                        <thead>
+                            <tr>
+                                <th>Piatto</th>
+                                <th style="text-align:center; width:60px;">Qty</th>
+                                @if (iCurrentRevision == -1) {
+                                    <th style="width:110px;"></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var kv in myOrders) {
+                                string itemKey = kv.Key;
+                                int itemQty   = kv.Value;
+                                <tr>
+                                    <td>@itemKey</td>
+                                    <td class="qty">@itemQty</td>
+                                    @if (iCurrentRevision == -1) {
+                                        <td>
+                                            <div class="qty-control" style="justify-content:center;">
+                                                <button class="qty-btn minus" @onclick="async () => await DecrMyOrder(itemKey)" title="Rimuovi 1">−</button>
+                                                <button class="qty-btn" @onclick="async () => await IncrMyOrder(itemKey)" title="Aggiungi 1">+</button>
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 }
-            </table>
+            </div>
         }
-    }
-</center>
+
+        <hr class="divider" style="margin-top:1rem;" />
+
+        <!-- ALL ORDERS TABLE -->
+        <div class="section-title">Tutti gli ordini</div>
+        @if (tempOrders.Keys.Count > 0) {
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Piatto</th>
+                        <th style="text-align:center; width:60px;">Qty</th>
+                        <th style="width:44px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < tempOrders.Keys.Count; i++) {
+                        string item = tempOrders.Keys.ElementAt(i);
+                        int qty     = tempOrders.Values.ElementAt(i);
+                        <tr>
+                            <td>@item</td>
+                            <td class="qty">@qty</td>
+                            <td class="action">
+                                <button class="edit-btn" @onclick='() => ShowDetails(item, "Utente")' title="Dettagli">
+                                    <img src="icons8-edit.svg" style="width:16px;height:16px;" />
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        } else {
+            <div class="empty-state">
+                <div class="icon">🍣</div>
+                <div>Nessun ordine nella stanza.</div>
+            </div>
+        }
+
+    </div>
+}
+
+</div>
 
 @code {
     private HubConnection? hubConnection;
@@ -58,7 +173,7 @@
     private ModalEditOrder? EditOrder { get; set; }
     private ModalShowDetails? ShowDetailsForm { get; set; }
     private ModalConfirm? ConfirmRemove { get; set; }
-    public string sError = "";
+
     public string sRoom = "";
     public string sName = "";
     public bool bIsRoomSet = false;
@@ -70,16 +185,24 @@
 
     public Dictionary<string, int> tempOrders = new Dictionary<string, int>();
 
+    // Mio ordine inline
+    private bool bShowMyOrder = false;
+    private Dictionary<string, int> myOrders = new Dictionary<string, int>();
+
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender && MainContainer.NavigationManager == null) { MainContainer.NavigationManager = NavigationManager; }
+        if (firstRender && MainContainer.NavigationManager == null) {
+            MainContainer.NavigationManager = NavigationManager;
+        }
     }
 
     protected override async Task OnInitializedAsync() {
-        Console.WriteLine("URL CHAT: "+NavigationManager.ToAbsoluteUri("/clienthub").ToString());
-        hubConnection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/clienthub")).Build();
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/clienthub"))
+            .Build();
 
         hubConnection.On<string, string>("ReceiveMessage", (room, message) => {
-            if (string.Equals(sRoom, room, StringComparison.CurrentCultureIgnoreCase)) InvokeAsync(UpdateRoom);
+            if (string.Equals(sRoom, room, StringComparison.CurrentCultureIgnoreCase))
+                InvokeAsync(UpdateRoom);
         });
 
         await hubConnection.StartAsync();
@@ -88,54 +211,80 @@
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
 
     public async ValueTask DisposeAsync() {
-        if (hubConnection is not null) {
-            await hubConnection.DisposeAsync();
-        }
+        if (hubConnection is not null) await hubConnection.DisposeAsync();
     }
 
     public void PrevOrders() {
-        if (iCurrentRevision == -1) { iCurrentRevision = MainContainer.GetOldVersionsCount(sRoom) - 1; InvokeAsync(UpdateRoom); } else if (iCurrentRevision - 1 > -1) { iCurrentRevision--; InvokeAsync(UpdateRoom); }
+        if (iCurrentRevision == -1) {
+            iCurrentRevision = MainContainer.GetOldVersionsCount(sRoom) - 1;
+        } else if (iCurrentRevision - 1 > -1) {
+            iCurrentRevision--;
+        }
+        InvokeAsync(UpdateRoom);
     }
 
     public void SetRoom() {
         if (string.IsNullOrEmpty(sRoom) || string.IsNullOrEmpty(sName)) return;
-
         bIsRoomSet = true;
         UpdateRoom();
     }
 
     public void UpdateRoom() {
         tempOrders = MainContainer.GetOrders(sRoom, iCurrentRevision);
+        if (bShowMyOrder) {
+            myOrders = MainContainer.GetByOwner(sRoom, sName, iCurrentRevision == -1 ? -1 : iCurrentRevision);
+        }
         StateHasChanged();
     }
 
     public async Task RemoveAll() {
         await MainContainer.RemoveAllOrdersAsync(sRoom);
+        bShowMyOrder = false;
         UpdateRoom();
     }
 
     public async Task AddOrder() {
+        if (string.IsNullOrWhiteSpace(sItem)) return;
         await MainContainer.AddOrderAsync(sRoom, sItem, sName, iQty);
         sItem = "";
         iQty = 1;
-
         UpdateRoom();
     }
 
     public void ShowDetails(string item, string columnName) {
         Dictionary<string, int> details = MainContainer.GetDetails(sRoom, item, iCurrentRevision);
-        if (details.Count == 1 && details.ContainsKey(sName)) { if (iCurrentRevision == -1) EditOrder?.Open(item); } else ShowDetailsForm?.Open(item, sName, columnName, iCurrentRevision != -1, details, iCurrentRevision != -1);
+        if (details.Count == 1 && details.ContainsKey(sName)) {
+            if (iCurrentRevision == -1) EditOrder?.Open(item);
+        } else {
+            ShowDetailsForm?.Open(item, sName, columnName, iCurrentRevision == -1, details, iCurrentRevision != -1);
+        }
     }
 
     private async Task OrderEdited(Tuple<string, int, int> args) {
-        ShowDetailsForm?.Close();
         if (args.Item2 == 0) return;
-        else if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, -1); return; }
+        ShowDetailsForm?.Close();
+        if (args.Item2 == 2) { await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, -1); return; }
         if (args.Item2 > 0) await MainContainer.RemoveOrderAsync(sRoom, args.Item1, sName, args.Item3);
     }
 
-    private void GetMyOrder() {
-        Dictionary<string, int> details = MainContainer.GetByOwner(sRoom, sName, iCurrentRevision);
-        if (details.Count == 1 && details.ContainsKey(sName)) { if (iCurrentRevision == -1) EditOrder?.Open(sName); } else ShowDetailsForm?.Open(sName, sName, "Ordine", false, details, iCurrentRevision != -1);
+    private void ToggleMyOrder() {
+        bShowMyOrder = !bShowMyOrder;
+        if (bShowMyOrder) {
+            myOrders = MainContainer.GetByOwner(sRoom, sName, iCurrentRevision == -1 ? -1 : iCurrentRevision);
+        }
+        StateHasChanged();
     }
-   }
+
+    private async Task IncrMyOrder(string item) {
+        await MainContainer.AddOrderAsync(sRoom, item, sName, 1);
+        myOrders = MainContainer.GetByOwner(sRoom, sName, -1);
+        UpdateRoom();
+    }
+
+    private async Task DecrMyOrder(string item) {
+        await MainContainer.RemoveOrderAsync(sRoom, item, sName, 1);
+        myOrders = MainContainer.GetByOwner(sRoom, sName, -1);
+        if (myOrders.Count == 0) bShowMyOrder = false;
+        UpdateRoom();
+    }
+}
